@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Lempar Dadu</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8f8f8;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        img {
+            width: 100px;
+            margin: 10px 0;
+        }
+        #resultText {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        #frequencyList, #probability {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎲 Simulasi Lempar Dadu</h1>
+    <button onclick="rollDice()">Lempar Dadu</button>
+    <button onclick="resetSimulation()">Reset</button>
+
+    <div>
+        <img id="diceImage" src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1-b.svg" alt="Dice">
+    </div>
+    <div id="resultText">-</div>
+
+    <h3>Frekuensi Kemunculan</h3>
+    <div id="frequencyList"></div>
+
+    <canvas id="diceChart" width="400" height="200"></canvas>
+
+    <div id="probability"></div>
+
+    <script>
+        let frequencies = [0, 0, 0, 0, 0, 0];
+
+        const diceImage = document.getElementById("diceImage");
+        const resultText = document.getElementById("resultText");
+        const frequencyList = document.getElementById("frequencyList");
+        const probabilityDiv = document.getElementById("probability");
+
+        const ctx = document.getElementById("diceChart").getContext("2d");
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1', '2', '3', '4', '5', '6'],
+                datasets: [{
+                    label: 'Frekuensi',
+                    data: frequencies,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        precision: 0
+                    }
+                }
+            }
+        });
+
+        function rollDice() {
+            const result = Math.floor(Math.random() * 6) + 1;
+            frequencies[result - 1]++;
+            resultText.textContent = result;
+
+            // Update Gambar Dadu
+            diceImage.src = `https://upload.wikimedia.org/wikipedia/commons/${getDiceSvg(result)}`;
+
+            updateFrequencyList();
+            updateProbability();
+            updateChart();
+        }
+
+        function updateFrequencyList() {
+            let html = "";
+            frequencies.forEach((freq, i) => {
+                html += `Angka ${i + 1}: ${freq} kali<br>`;
+            });
+            frequencyList.innerHTML = html;
+        }
+
+        function updateProbability() {
+            const total = frequencies.reduce((a, b) => a + b, 0);
+            let html = "<strong>Probabilitas (%) per angka:</strong><br>";
+            frequencies.forEach((freq, i) => {
+                const prob = total ? ((freq / total) * 100).toFixed(2) : 0;
+                html += `Angka ${i + 1}: ${prob}%<br>`;
+            });
+            probabilityDiv.innerHTML = html;
+        }
+
+        function updateChart() {
+            chart.data.datasets[0].data = frequencies;
+            chart.update();
+        }
+
+        function resetSimulation() {
+            frequencies = [0, 0, 0, 0, 0, 0];
+            resultText.textContent = "-";
+            diceImage.src = "https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1-b.svg";
+            frequencyList.innerHTML = "";
+            probabilityDiv.innerHTML = "";
+            updateChart();
+        }
+
+        function getDiceSvg(num) {
+            const svgPaths = {
+                1: "1/1b/Dice-1-b.svg",
+                2: "5/5f/Dice-2-b.svg",
+                3: "b/b1/Dice-3-b.svg",
+                4: "f/fd/Dice-4-b.svg",
+                5: "0/08/Dice-5-b.svg",
+                6: "2/26/Dice-6-b.svg"
+            };
+            return svgPaths[num];
+        }
+    </script>
+</body>
+</html>
